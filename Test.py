@@ -1,3 +1,6 @@
+import cv2
+
+
 class Test:
     def __init__(self):
         pass
