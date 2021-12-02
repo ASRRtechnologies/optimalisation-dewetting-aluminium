@@ -1,13 +1,14 @@
-# optimalisation-dewetting-aluminium
+# Optimalization Dewetting Aluminium
+## BEP - Lotte Boonstra
 
 ## Goal:
-### h3
-#### h4
-
-Attempt | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 | #9 | #10 | #11
---- | --- | --- | --- |--- |--- |--- |--- |--- |--- |--- |---
-Seconds | 301 | 283 | 290 | 286 | 289 | 285 | 287 | 287 | 272 | 276 | 269
+Analyse dewetting results for improvements
 
 ## Checklist
-- [ ] test 1
-- [x] test 2
+- [x] Blur image
+- [x] Find contours
+
+## Resources
+1. https://www.pyimagesearch.com/2021/05/12/opencv-edge-detection-cv2-canny/
+2. https://docs.opencv.org/3.4/da/d22/tutorial_py_canny.html
+3. https://stackoverflow.com/questions/64394768/how-calculate-the-area-of-irregular-object-in-an-image-opencv-python-3-8

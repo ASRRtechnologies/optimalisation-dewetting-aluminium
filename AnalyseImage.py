@@ -6,33 +6,66 @@ class AnalyseImage:
     def __init__(self):
         pass
 
-    img = cv2.imread('images/test-images/test.bmp')
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    lower = np.array([50, 50, 50])
-    upper = np.array([160, 255, 255])
+    # finding coin and steak contours
+    def getContours(img, imgContour):
 
-    mask = cv2.inRange(hsv, lower, upper)
+        # find all the contours from the B&W image
+        contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Show the image
-    cv2.imshow('img', mask)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+        # needed to filter only our contours of interest
+        finalContours = []
 
-# import path
-# path = /Users/lotteboonstra/projects/tud/optimalisation-dewetting-aluminium/images/test-images/Alu_SiC_K_2000.bmp
+        # for each contour found
+        for cnt in contours:
+            # cv2.drawContours(imgContour, cnt, -1, (255, 0, 255), 2)
+            # find its area in pixel
+            area = cv2.contourArea(cnt)
+            print("Detected Contour with Area: ", area)
 
+            # minimum area value is to be fixed as the one that leaves the coin as the small object on the scene
+            if (area > 5000):
+                perimeter = cv2.arcLength(cnt, True)
 
-#
-# gray=cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
-# gray=cv2.threshold(gray,20,255,cv2.THRESH_BINARY)[1]
-# cv2.imshow('gray',gray)
-#
-# contours,hierarchy = cv2.findContours(gray,cv2.RETR_LIST ,cv2.CHAIN_APPROX_SIMPLE   )
-#
-# for cnt in contours:
-#     area = cv2.contourArea(cnt)
-#     if area<400:
-#         cv2.drawContours(im,[cnt],0,(255,0,0),2)
-#
-# cv2.imshow('im',im)
-# cv2.waitKey()
+                # smaller epsilon -> more vertices detected [= more precision]
+                epsilon = 0.002 * perimeter
+                # check how many vertices
+                approx = cv2.approxPolyDP(cnt, epsilon, True)
+                # print(len(approx))
+
+                finalContours.append([len(approx), area, approx, cnt])
+
+        # we want only two objects here: the coin and the meat slice
+        print("---\nFinal number of External Contours: ", len(finalContours))
+        # so at this point finalContours should have only two elements
+        # sorting in ascending order depending on the area
+        finalContours = sorted(finalContours, key=lambda x: x[1], reverse=False)
+
+        # drawing contours for the final objects
+        for con in finalContours:
+            cv2.drawContours(imgContour, con[3], -1, (0, 0, 255), 3)
+
+        return imgContour, finalContours
+
+    # input image
+    path = "images/test-images/test.bmp"
+
+    # sourcing the input image
+    img = cv2.imread(path)
+    cv2.imshow("Starting image", img)
+    cv2.waitKey()
+
+    # blurring
+    imgBlur = cv2.GaussianBlur(img, (7, 7), 1)
+    # graying
+    imgGray = cv2.cvtColor(imgBlur, cv2.COLOR_BGR2GRAY)
+    # canny
+    imgCanny = cv2.Canny(imgGray, 100, 60)  # TODO: figure out correct upper and lower bounds for canny
+
+    kernel = np.ones((2, 2))
+    imgDil = cv2.dilate(imgCanny, kernel, iterations=3)
+    imgThre = cv2.erode(imgDil, kernel, iterations=3)
+    imgFinalContours, finalContours = getContours(imgThre, img)
+
+    # show  the contours on the unfiltered starting image
+    cv2.imshow("Final External Contours", imgFinalContours)
+    cv2.waitKey()
