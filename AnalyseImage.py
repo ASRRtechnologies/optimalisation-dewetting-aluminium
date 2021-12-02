@@ -6,7 +6,7 @@ class AnalyseImage:
     def __init__(self):
         pass
 
-    # finding coin and steak contours
+    # finding contours
     def getContours(img, imgContour):
 
         # find all the contours from the B&W image
