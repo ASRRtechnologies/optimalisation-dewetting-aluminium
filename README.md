@@ -4,6 +4,8 @@
 ## Goal:
 Analyse dewetting results for improvements
 
+![img.png](images/results/first-contour.png)
+
 ## Checklist
 - [x] Blur image
 - [x] Find contours
