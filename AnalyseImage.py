@@ -3,6 +3,8 @@ import numpy as np
 import glob
 import csv
 from datetime import datetime
+import argparse
+
 
 # finding contours
 def get_contours(img, imgContour):
@@ -69,26 +71,62 @@ def process_image(path):
     return len(finalContours)
 
 
-class AnalyseImage:
-    # function that allows multiple files to be read
-    # def getImages(self):
-    #   for i in
+# function to determine the scale of the image
 
+def determine_scale(path):
+    # sourcing the input image
+    img = cv2.imread(path)
+    cv2.imshow("Starting image", img)
+    cv2.waitKey()
+
+    # blurring
+    imgBlur = cv2.GaussianBlur(img, (7, 7), 1)
+    # graying
+    imgGray = cv2.cvtColor(imgBlur, cv2.COLOR_BGR2GRAY)
+    # canny
+    imgCanny = cv2.Canny(imgGray, 100, 60)  # TODO: figure out correct upper and lower bounds for canny
+
+    kernel = np.ones((2, 2))
+    imgDil = cv2.dilate(imgCanny, kernel, iterations=3)
+    imgThre = cv2.erode(imgDil, kernel, iterations=3)
+    imgFinalContours, finalContours = get_contours(imgThre, img)
+
+    # show  the contours on the unfiltered starting image
+    cv2.imshow("Final External Contours", imgFinalContours)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+    return len(finalContours)
+
+# definition to determine the canny
+def auto_canny(image, sigma=0.33):
+    # compute the median of the single channel pixel intensities
+    v = np.median(image)
+    # apply automatic Canny edge detection using the computed median
+    lower = int(max(0, (1.0 - sigma) * v))
+    upper = int(min(255, (1.0 + sigma) * v))
+    edged = cv2.Canny(image, lower, upper)
+    # return the edged image
+    return edged
+
+
+class AnalyseImage:
     paths = glob.glob("images/test-images/*.bmp")
     print(paths)
 
-    # open the file in the write mode
-    f = open(f'output/{datetime.now()}-output.csv', 'w+')
+    # determine scale of an image
+    determine_scale("images/test-images/10-times-5um-by-10-times-5-um.bmp")
 
-    # create the csv writer
-    writer = csv.writer(f)
-    writer.writerow(["PATH", "TOTAL FINAL CONTOURS"])
-
-    for path in paths:
-        totalContours = process_image(path)
-        # write a row to the csv file
-        writer.writerow([path, totalContours])
-
-
-    # close the file
-    f.close()
+    # # open the file in the write mode
+    # f = open(f'output/{datetime.now()}-output.csv', 'w+')
+    #
+    # # create the csv writer
+    # writer = csv.writer(f)
+    # writer.writerow(["PATH", "TOTAL FINAL CONTOURS"])
+    #
+    # for path in paths:
+    #     totalContours = process_image(path)
+    #     # write a row to the csv file
+    #     writer.writerow([path, totalContours])
+    #
+    # # close the file
+    # f.close()
