@@ -24,7 +24,7 @@ def get_contours(img, imgContour):
         print("Detected Contour with Area: ", area)
 
         # minimum area value is to be fixed as the one that leaves the coin as the small object on the scene
-        if area > 5000:
+        if area > 500:
             perimeter = cv2.arcLength(cnt, True)
 
             # smaller epsilon -> more vertices detected [= more precision]
@@ -51,7 +51,7 @@ def get_contours(img, imgContour):
 def process_image(path):
     # sourcing the input image
     img = cv2.imread(path)
-    imgBlur = cv2.GaussianBlur(img, (1, 1), 0)
+    imgBlur = cv2.GaussianBlur(img, (3, 3), 0)
 
     # graying
     imgGray = cv2.cvtColor(imgBlur, cv2.COLOR_BGR2GRAY)
