@@ -79,8 +79,8 @@ def process_image(path):
     imgFinalContours, finalContours = get_contours(imgThre, img)
 
     # show  the contours on the unfiltered starting image
-    # cv2.imshow("Final External Contours", imgFinalContours)
-    # cv2.waitKey()
+    cv2.imshow("Final External Contours", imgFinalContours)
+    cv2.waitKey()
     cv2.destroyAllWindows()
     return finalContours
 
