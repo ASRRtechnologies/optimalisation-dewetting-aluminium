@@ -8,6 +8,18 @@ import os
 import errno
 
 
+def get_value_from_file(path, propertyName):
+    t_path = path.replace("tif", "txt")
+    print("Retrieving area for picture:", t_path)
+
+    t_values = {}
+    with open(t_path) as myfile:
+        for line in myfile:
+            name, var = line.partition("=")[::2]
+            t_values[name.strip()] = var.replace("\n", "")
+
+    return t_values[propertyName]
+
 # finding contours
 def get_contours(img, imgContour):
     # find all the contours from the B&W image
@@ -67,8 +79,8 @@ def process_image(path):
     imgFinalContours, finalContours = get_contours(imgThre, img)
 
     # show  the contours on the unfiltered starting image
-    cv2.imshow("Final External Contours", imgFinalContours)
-    cv2.waitKey()
+    # cv2.imshow("Final External Contours", imgFinalContours)
+    # cv2.waitKey()
     cv2.destroyAllWindows()
     return finalContours
 
@@ -91,7 +103,7 @@ class AnalyseImage:
 
     # create the csv writer
     writer = csv.writer(f)
-    writer.writerow(["PATH", "TOTAL FINAL CONTOURS", "PIXEL-AREA"])
+    writer.writerow(["ID", "PATH", "PIXEL-AREA", "PIXEL-SIZE", "Area in square nanometers"])
 
     for path in paths:
         finalContours = process_image(path)
@@ -100,11 +112,15 @@ class AnalyseImage:
         print("Found final contours: ", len(finalContours))
         count = 0
 
+        pixelSize = float(get_value_from_file(path, "PixelSize"))
+
         for finalContour in finalContours:
             count += 1
             len, area, approx, cnt = finalContour
             print("Appending file with finalContour with area", area)
-            writer.writerow([path, count, area])
+            writer.writerow([count, path, area, pixelSize, pixelSize * area])
 
     # close the file
     f.close()
+
+
