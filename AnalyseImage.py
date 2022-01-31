@@ -33,7 +33,7 @@ def get_contours(img, imgContour):
         cv2.drawContours(imgContour, cnt, -1, (255, 0, 255), 2)
         # find its area in pixel
         area = cv2.contourArea(cnt)
-        print("Detected Contour with Area: ", area)
+        # print("Detected Contour with Area: ", area)
 
         # minimum area value is to be fixed as the one that leaves the coin as the small object on the scene
         if area > 500:
@@ -104,12 +104,13 @@ class AnalyseImage:
     # create the csv writer
     writer = csv.writer(f)
     writer.writerow(["ID", "PATH", "PIXEL-AREA", "PIXEL-SIZE", "Area in square nanometers"])
+    imgNo = 0
 
     for path in paths:
         finalContours = process_image(path)
         # write a row to the csv file
-
-        print("Found final contours: ", len(finalContours))
+        imgNo += 1
+        # print("Found final contours: ", len(finalContours))
         count = 0
 
         pixelSize = float(get_value_from_file(path, "PixelSize"))
@@ -118,9 +119,10 @@ class AnalyseImage:
             count += 1
             len, area, approx, cnt = finalContour
             print("Appending file with finalContour with area", area)
-            writer.writerow([count, path, area, pixelSize, pixelSize * area])
+            writer.writerow([str(imgNo) + "-" + str(count), path, area, pixelSize, pixelSize * area])
 
     # close the file
     f.close()
+
 
 
