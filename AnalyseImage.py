@@ -96,9 +96,10 @@ def process_image(path):
 class AnalyseImage:
     paths = glob.glob("images/test-images/*.tif")
 
-    filename = f'output/{datetime.now().date()}/{datetime.now().time()}-output.csv'
+    baseDir = f"output/{datetime.now().date()}/{datetime.now().time()}"
+    filename = f'{baseDir}/summary.csv'
 
-    # Create folder if it doesnt exist
+    # Create folder if it doesnt exisst
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
@@ -110,25 +111,31 @@ class AnalyseImage:
     f = open(filename, 'w+')
 
     # create the csv writer
-    writer = csv.writer(f)
-    writer.writerow(["ID", "Path", "Image Area", "Pixel Size", "Cntour Pixel Area", "Area in square nm", "Density"])
+    summaryWriter = csv.writer(f)
+    summaryWriter.writerow(["Path", "Image Area", "Pixel Size", "Number of holes", "Total hole size", "Average hole size", "Density"])
     imgNo = 0
 
     for path in paths:
-        finalContours = process_image(path)
-        # write a row to the csv file
-        imgNo += 1
-        # print("Found final contours: ", len(finalContours))
-        count = 0
+        detailBaseDir = f"{baseDir}/detail/"
+        os.makedirs(detailBaseDir, exist_ok=True)
+        f2 = open(f"{detailBaseDir}/{os.path.basename(path).replace('tif', 'csv')}", 'w+')
+        pathWriter = csv.writer(f2)
+        pathWriter.writerow(["ID", "Path", "Image Area", "Pixel Size", "Cntour Pixel Area", "Area in square nm", "Density"])
 
+        imgNo += 1
+        count = 1
+        totalArea = 0
+
+        finalContours = process_image(path)
         pixelSize = float(get_value_from_file(path, "PixelSize"))
         imageArea, density = get_density(pixelSize, len(finalContours), path)
-        print("Dit is de dichtheid", density)
 
         for finalContour in finalContours:
-            count += 1
             length, area, approx, cnt = finalContour
-            writer.writerow([str(imgNo) + "|" + str(count), path, imageArea, pixelSize, area, (pixelSize ** 2) * area, str(density) ])
+            pathWriter.writerow([str(imgNo) + "|" + str(count), path, imageArea, pixelSize, area, (pixelSize ** 2) * area, str(density) ])
+            totalArea += area
+            count += 1
 
-    # close the file
+        summaryWriter.writerow([path, imageArea, pixelSize, count, totalArea, totalArea/count, density])
+
     f.close()
