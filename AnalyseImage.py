@@ -20,6 +20,15 @@ def get_value_from_file(path, propertyName):
 
     return t_values[propertyName]
 
+def get_density(PixelSize, finalcountours, path):
+    dataSize = get_value_from_file(path, "DataSize")
+    height, width = dataSize.partition("x")[::2]
+    imageArea = int(height) * int(width) * (PixelSize ** 2)
+
+    print("calculated length to be: ", height, " width to be: ", width, " total size is: ", imageArea, " nm^2")
+    return imageArea, finalcountours / imageArea
+
+
 # finding contours
 def get_contours(img, imgContour):
     # find all the contours from the B&W image
@@ -79,14 +88,13 @@ def process_image(path):
     imgFinalContours, finalContours = get_contours(imgThre, img)
 
     # show  the contours on the unfiltered starting image
-    cv2.imshow("Final External Contours", imgFinalContours)
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    # cv2.imshow(path, imgFinalContours)
+    # cv2.waitKey()
+    # cv2.destroyAllWindows()
     return finalContours
 
 class AnalyseImage:
     paths = glob.glob("images/test-images/*.tif")
-    print(paths)
 
     filename = f'output/{datetime.now().date()}/{datetime.now().time()}-output.csv'
 
@@ -103,7 +111,7 @@ class AnalyseImage:
 
     # create the csv writer
     writer = csv.writer(f)
-    writer.writerow(["ID", "PATH", "PIXEL-AREA", "PIXEL-SIZE", "Area in square nanometers"])
+    writer.writerow(["ID", "Path", "Image Area", "Pixel Size", "Cntour Pixel Area", "Area in square nm", "Density"])
     imgNo = 0
 
     for path in paths:
@@ -114,15 +122,13 @@ class AnalyseImage:
         count = 0
 
         pixelSize = float(get_value_from_file(path, "PixelSize"))
+        imageArea, density = get_density(pixelSize, len(finalContours), path)
+        print("Dit is de dichtheid", density)
 
         for finalContour in finalContours:
             count += 1
-            len, area, approx, cnt = finalContour
-            print("Appending file with finalContour with area", area)
-            writer.writerow([str(imgNo) + "-" + str(count), path, area, pixelSize, (pixelSize ** 2) * area])
+            length, area, approx, cnt = finalContour
+            writer.writerow([str(imgNo) + "|" + str(count), path, imageArea, pixelSize, area, (pixelSize ** 2) * area, str(density) ])
 
     # close the file
     f.close()
-
-
-
