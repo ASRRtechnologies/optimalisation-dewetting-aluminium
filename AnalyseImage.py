@@ -119,7 +119,7 @@ class AnalyseImage:
             count += 1
             len, area, approx, cnt = finalContour
             print("Appending file with finalContour with area", area)
-            writer.writerow([str(imgNo) + "-" + str(count), path, area, pixelSize, pixelSize * area])
+            writer.writerow([str(imgNo) + "-" + str(count), path, area, pixelSize, (pixelSize ** 2) * area])
 
     # close the file
     f.close()
