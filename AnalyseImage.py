@@ -1,5 +1,6 @@
 import cv2
 import cv2.cv2
+import numpy
 import numpy as np
 import glob
 import csv
@@ -114,7 +115,7 @@ def get_color(path):
 
     return 'r'
 
-def render_graph(path):
+def render_graph(path, output):
     # Initialize the lists for X and Y
     data = pd.read_csv(path)
 
@@ -131,11 +132,40 @@ def render_graph(path):
     plt.ylabel("Number of holes")
     plt.tight_layout()
 
-    plt.savefig(os.path.dirname(path) + "/holes.png")
+    plt.savefig(output)
 
     # Show the plot
     plt.show()
 
+def render_combinations(baseDir):
+    # Initialize the lists for X and Y
+    paths = glob.glob(f"{baseDir}/detail/*.csv")
+    ax = None
+    legend = []
+
+    for path in paths:
+        data = pd.read_csv(path)
+        prettyName = os.path.basename(path).split(".")[0]
+        legend.append(prettyName)
+        df = pd.DataFrame(data)
+
+        # Plot the data using bar() method
+        if ax is not None:
+            df.plot(x="Temperature", y="Number of holes", kind="scatter", c=numpy.random.rand(3, ), ax=ax)
+        else:
+            ax = df.plot(x="Temperature", y="Number of holes", kind="scatter", c=numpy.random.rand(3,))
+
+        plt.xticks(rotation=90)
+        plt.title(f"Number of holes {prettyName}")
+        plt.xlabel("Path title")
+        plt.ylabel("Number of holes")
+        plt.tight_layout()
+
+        plt.savefig(path.replace("csv", "png"))
+
+    ax.legend(legend)
+    # Show the plot
+    plt.show()
 
 class AnalyseImage:
     showImages = False
@@ -162,11 +192,16 @@ class AnalyseImage:
     imgNo = 0
 
     for path in paths:
+        cf = os.path.basename(path)
+        substrate = cf.split("-")[0]
+        bilayer = cf.split("-")[1]
+        temp = cf.split("_")[1]
+
         detailBaseDir = f"{baseDir}/detail/"
         os.makedirs(detailBaseDir, exist_ok=True)
-        f2 = open(f"{detailBaseDir}/{os.path.basename(path).replace('tif', 'csv')}", 'w+')
+        f2 = open(f"{detailBaseDir}/{substrate}-{bilayer}.csv", 'w+')
         pathWriter = csv.writer(f2)
-        pathWriter.writerow(["ID", "Path", "Image Area", "Pixel Size", "Cntour Pixel Area", "Area in square nm", "Density"])
+        pathWriter.writerow(["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Cntour Pixel Area", "Area in square nm", "Density"])
 
         imgNo += 1
         count = 1
@@ -179,14 +214,13 @@ class AnalyseImage:
 
         for finalContour in finalContours:
             length, area, approx, cnt = finalContour
-            pathWriter.writerow([str(imgNo) + "|" + str(count), path, imageArea, pixelSize, area, (pixelSize ** 2) * area, str(density) ])
             totalArea += area
             count += 1
 
+        pathWriter.writerow([temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density) ])
         prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
-
         summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, totalArea/count, density])
 
     f.close()
-    render_graph(summaryFileName)
-
+    render_graph(summaryFileName, os.path.dirname(path) + "/holes.png")
+    render_combinations(baseDir)
