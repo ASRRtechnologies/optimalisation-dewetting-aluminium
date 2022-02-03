@@ -12,7 +12,7 @@ import pandas as pd
 
 
 def get_value_from_file(path, propertyName):
-    t_path = path.replace("tif", "txt")
+    t_path = path.replace("bmp", "txt")
     print("Retrieving area for picture:", t_path)
 
     t_values = {}
@@ -151,26 +151,28 @@ def render_combinations(baseDir):
 
         # Plot the data using bar() method
         if ax is not None:
-            df.plot(x="Temperature", y="Number of holes", kind="scatter", c=numpy.random.rand(3, ), ax=ax)
+            df.plot(x="Temperature", y="Density", kind="scatter", c=numpy.random.rand(3, ), ax=ax)
         else:
-            ax = df.plot(x="Temperature", y="Number of holes", kind="scatter", c=numpy.random.rand(3,))
+            ax = df.plot(x="Temperature", y="Density", kind="scatter", c=numpy.random.rand(3,))
 
         plt.xticks(rotation=90)
-        plt.title(f"Number of holes {prettyName}")
-        plt.xlabel("Path title")
-        plt.ylabel("Number of holes")
+        plt.title(f"Density / temp {prettyName}")
+        plt.xlabel("Temp")
+        plt.ylabel("Density")
         plt.tight_layout()
 
         plt.savefig(path.replace("csv", "png"))
 
     ax.legend(legend)
+    plt.savefig(f"{baseDir}/summary.png")
+
     # Show the plot
     plt.show()
 
 class AnalyseImage:
     showImages = False
 
-    paths = glob.glob("images/test-images/*.tif")
+    paths = glob.glob("images/input/*.bmp")
 
     baseDir = f"output/{datetime.now().date()}/{datetime.now().time()}"
     summaryFileName = f'{baseDir}/summary.csv'
@@ -193,15 +195,19 @@ class AnalyseImage:
 
     for path in paths:
         cf = os.path.basename(path)
-        substrate = cf.split("-")[0]
-        bilayer = cf.split("-")[1]
-        temp = cf.split("_")[1]
+        substrate = cf.split("_")[0]
+        bilayer = cf.split("_")[1]
+        temp = cf.split("_")[2]
 
         detailBaseDir = f"{baseDir}/detail/"
         os.makedirs(detailBaseDir, exist_ok=True)
-        f2 = open(f"{detailBaseDir}/{substrate}-{bilayer}.csv", 'w+')
+        detailPath = f"{detailBaseDir}/{substrate}-{bilayer}.csv"
+        exists = os.path.exists(detailPath)
+        f2 = open(detailPath, 'a+')
         pathWriter = csv.writer(f2)
-        pathWriter.writerow(["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Cntour Pixel Area", "Area in square nm", "Density"])
+
+        if not exists:
+            pathWriter.writerow(["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Cntour Pixel Area", "Area in square nm", "Density"])
 
         imgNo += 1
         count = 1
