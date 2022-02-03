@@ -146,6 +146,7 @@ def render_combinations(baseDir):
     for path in paths:
         data = pd.read_csv(path)
         prettyName = os.path.basename(path).split(".")[0]
+        data.sort_values(["Temperature"])
         legend.append(prettyName)
         df = pd.DataFrame(data)
 
