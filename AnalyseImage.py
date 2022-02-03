@@ -6,6 +6,8 @@ import csv
 from datetime import datetime
 import os
 import errno
+import matplotlib.pyplot as plt
+import pandas as pd
 
 
 def get_value_from_file(path, propertyName):
@@ -27,7 +29,6 @@ def get_density(PixelSize, finalcountours, path):
 
     print("calculated length to be: ", height, " width to be: ", width, " total size is: ", imageArea, " nm^2")
     return imageArea, finalcountours / imageArea
-
 
 # finding contours
 def get_contours(img, imgContour):
@@ -69,10 +70,19 @@ def get_contours(img, imgContour):
     return imgContour, final_contours
 
 
-def process_image(path):
+def process_image(path, showImages):
     # sourcing the input image
     img = cv2.imread(path)
+
+    # blurring
     imgBlur = cv2.GaussianBlur(img, (3, 3), 0)
+
+    # # adding black border
+    # row, col = imgBlur.shape[:2]
+    # bottom = imgBlur[row - 2:row, 0:col]
+    #
+    # bordersize = 5000
+    # border = cv2.copyMakeBorder(imgBlur, bordersize, bordersize, bordersize, bordersize, cv2.BORDER_CONSTANT, 0)
 
     # graying
     imgGray = cv2.cvtColor(imgBlur, cv2.COLOR_BGR2GRAY)
@@ -88,31 +98,67 @@ def process_image(path):
     imgFinalContours, finalContours = get_contours(imgThre, img)
 
     # show  the contours on the unfiltered starting image
-    # cv2.imshow(path, imgFinalContours)
-    # cv2.waitKey()
-    # cv2.destroyAllWindows()
+    if showImages:
+        cv2.imshow(path, imgFinalContours)
+        cv2.waitKey()
+        cv2.destroyAllWindows()
+
     return finalContours
 
+def get_color(path):
+    if path.startswith("Si"):
+        return 'g'
+
+    if path.startswith("Nb"):
+        return 'b'
+
+    return 'r'
+
+def render_graph(path):
+    # Initialize the lists for X and Y
+    data = pd.read_csv(path)
+
+    df = pd.DataFrame(data)
+
+    X = list(df.iloc[:, 1])
+    Y = list(df.iloc[:, 4])
+
+    # Plot the data using bar() method
+    plt.bar(X, Y, color='b')
+    plt.xticks(rotation=90)
+    plt.title("Number of holes")
+    plt.xlabel("Path title")
+    plt.ylabel("Number of holes")
+    plt.tight_layout()
+
+    plt.savefig(os.path.dirname(path) + "/holes.png")
+
+    # Show the plot
+    plt.show()
+
+
 class AnalyseImage:
+    showImages = False
+
     paths = glob.glob("images/test-images/*.tif")
 
     baseDir = f"output/{datetime.now().date()}/{datetime.now().time()}"
-    filename = f'{baseDir}/summary.csv'
+    summaryFileName = f'{baseDir}/summary.csv'
 
     # Create folder if it doesnt exisst
-    if not os.path.exists(os.path.dirname(filename)):
+    if not os.path.exists(os.path.dirname(summaryFileName)):
         try:
-            os.makedirs(os.path.dirname(filename))
+            os.makedirs(os.path.dirname(summaryFileName))
         except OSError as exc:  # Guard against race condition
             if exc.errno != errno.EEXIST:
                 raise
 
     # open the file in the write mode
-    f = open(filename, 'w+')
+    f = open(summaryFileName, 'w+')
 
     # create the csv writer
     summaryWriter = csv.writer(f)
-    summaryWriter.writerow(["Path", "Image Area", "Pixel Size", "Number of holes", "Total hole size", "Average hole size", "Density"])
+    summaryWriter.writerow(["Path", "Name", "Image Area", "Pixel Size", "Number of holes", "Total hole size", "Average hole size", "Density"])
     imgNo = 0
 
     for path in paths:
@@ -126,8 +172,9 @@ class AnalyseImage:
         count = 1
         totalArea = 0
 
-        finalContours = process_image(path)
+        finalContours = process_image(path, showImages)
         pixelSize = float(get_value_from_file(path, "PixelSize"))
+        magnification = get_value_from_file(path, "Magnification")
         imageArea, density = get_density(pixelSize, len(finalContours), path)
 
         for finalContour in finalContours:
@@ -136,6 +183,10 @@ class AnalyseImage:
             totalArea += area
             count += 1
 
-        summaryWriter.writerow([path, imageArea, pixelSize, count, totalArea, totalArea/count, density])
+        prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
+
+        summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, totalArea/count, density])
 
     f.close()
+    render_graph(summaryFileName)
+
