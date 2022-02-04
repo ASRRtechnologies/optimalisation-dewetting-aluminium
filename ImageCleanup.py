@@ -21,24 +21,25 @@ class ImageCleanup:
         desiredName = desiredName.replace("SiC-TiP_Alu-13", "SiC_TiP-Alu")
         desiredName = desiredName.replace("SiC-TiP_Alu_12", "SiC_TiP-Alu")
         desiredName = desiredName.replace("SiN-TiP_Alu-14", "SiN_TiP-Alu")
-        desiredName = desiredName.replace("Si-NbTiN_TiP_Alu-12", "Si-NbT_TiP-Alu")
-        desiredName = desiredName.replace("Si_NbTiN-TiP_Alu_12", "Si-NbT_TiP-Alu")
+        desiredName = desiredName.replace("Si-NbTiN_TiP_Alu-12", "Si-NbTiN_TiP-Alu")
+        desiredName = desiredName.replace("Si_NbTiN-TiP_Alu_12", "Si-NbTiN_TiP-Alu")
+        desiredName = desiredName.replace("Si-NbT_TiP-Alu", "Si-NbTiN_TiP-Alu")
 
         #150 batch
-        desiredName = desiredName.replace("Si-NbTiN_TiP_Alu-14", "Si-NbT_TiP-Alu")
+        desiredName = desiredName.replace("Si-NbTiN_TiP_Alu-14", "Si-NbTiN_TiP-Alu")
         desiredName = desiredName.replace("Si-TiP_Alu-14", "Si_TiP-Alu")
         desiredName = desiredName.replace("SiC-TiP_Alu-14", "SiC_TiP-Alu")
         desiredName = desiredName.replace("SiN-TiP_Alu-14", "SiN_TiP-Alu")
-        desiredName = desiredName.replace("NbT-TiP_Alu-14", "Si-NbT_TiP-Alu")
+        desiredName = desiredName.replace("NbT-TiP_Alu-14", "Si-NbTiN_TiP-Alu")
 
         #170 batch
-        desiredName = desiredName.replace("NbTiN-TiP_Alu-12", "Si-NbT_TiP-Alu")
+        desiredName = desiredName.replace("NbTiN-TiP_Alu-12", "Si-NbTiN_TiP-Alu")
         desiredName = desiredName.replace("Si-TiP_Alu-11", "Si_TiP-Alu")
         desiredName = desiredName.replace("SiC-TiP_Alu-13", "SiC_TiP-Alu")
         desiredName = desiredName.replace("SiN-TiP_Alu-14", "SiN_TiP-Alu")
 
         #200 batch
-        desiredName = desiredName.replace("NbT-TiP_Alu-12", "Si-NbT_TiP-Alu")
+        desiredName = desiredName.replace("NbT-TiP_Alu-12", "Si-NbTiN_TiP-Alu")
         desiredName = desiredName.replace("Si-TiP_Alu-11", "Si_TiP-Alu")
         desiredName = desiredName.replace("SiC-TiP_Alu-12", "SiC_TiP-Alu")
         desiredName = desiredName.replace("SiN-TiP_Alu-12", "SiN_TiP-Alu")

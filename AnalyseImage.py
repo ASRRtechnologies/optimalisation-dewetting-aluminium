@@ -9,6 +9,8 @@ import os
 import errno
 import matplotlib.pyplot as plt
 import pandas as pd
+from numpy import arange
+from scipy.optimize import curve_fit
 
 
 def get_value_from_file(path, propertyName):
@@ -22,11 +24,13 @@ def get_value_from_file(path, propertyName):
 
     return t_values[propertyName]
 
+
 def get_density(PixelSize, finalcountours, path):
     dataSize = get_value_from_file(path, "DataSize")
     height, width = dataSize.partition("x")[::2]
     imageArea = int(height) * int(width) * (PixelSize ** 2)
     return imageArea, finalcountours / imageArea
+
 
 # finding contours
 def get_contours(img, imgContour):
@@ -44,7 +48,7 @@ def get_contours(img, imgContour):
         # print("Detected Contour with Area: ", area)
 
         # minimum area value is to be fixed as the one that leaves the coin as the small object on the scene
-        if area > 500:
+        if area > 200:
             perimeter = cv2.arcLength(cnt, True)
 
             # smaller epsilon -> more vertices detected [= more precision]
@@ -103,9 +107,10 @@ def process_image(path, showImages):
 
     return finalContours
 
+
 def get_color(name):
-    if name.startswith("Si-NbT"):
-        return 'g'
+    if name.startswith("Si-NbTiN"):
+        return 'k'
 
     if name.startswith("SiC"):
         return 'b'
@@ -114,6 +119,8 @@ def get_color(name):
         return 'y'
 
     return 'r'
+
+
 
 def render_graph(path, output):
     # Initialize the lists for X and Y
@@ -124,10 +131,11 @@ def render_graph(path, output):
     X = list(df.iloc[:, 1])
     Y = list(df.iloc[:, 4])
 
+
     # Plot the data using bar() method
     plt.bar(X, Y, color='b')
     plt.xticks(rotation=90)
-    plt.title("Number of holes")
+    plt.title("Number of holes per image")
     plt.xlabel("Path title")
     plt.ylabel("Number of holes")
     plt.tight_layout()
@@ -136,6 +144,7 @@ def render_graph(path, output):
 
     # Show the plot
     plt.show()
+
 
 def render_combinations(baseDir):
     # Initialize the lists for X and Y
@@ -147,19 +156,22 @@ def render_combinations(baseDir):
         data = pd.read_csv(path)
         prettyName = os.path.basename(path).split(".")[0]
         data.sort_values(["Temperature"])
-        legend.append(prettyName)
         df = pd.DataFrame(data)
+
+        x_label = "Temperature"
+        y_label = "Density"
 
         # Plot the data using bar() method
         if ax is not None:
-            df.plot(x="Temperature", y="Density", kind="scatter", c=numpy.random.rand(3, ), ax=ax)
+            df.plot(x=x_label, y=y_label, kind="scatter", c=get_color(prettyName), ax=ax)
         else:
-            ax = df.plot(x="Temperature", y="Density", kind="scatter", c=get_color(prettyName))
+            ax = df.plot(x=x_label, y=y_label, kind="scatter", c=get_color(prettyName))
 
+        legend.append(prettyName)
         plt.xticks(rotation=90)
-        plt.title(f"Density / temp {prettyName}")
-        plt.xlabel("Temp")
-        plt.ylabel("Density")
+        plt.title(f"Density vs. Temperature {prettyName}")
+        plt.xlabel("Temperature (\N{DEGREE SIGN} C)")
+        plt.ylabel("Density (holes per squared nanometer)")
         plt.tight_layout()
 
         plt.savefig(path.replace("csv", "png"))
@@ -169,6 +181,7 @@ def render_combinations(baseDir):
 
     # Show the plot
     plt.show()
+
 
 class AnalyseImage:
     showImages = False
@@ -191,7 +204,9 @@ class AnalyseImage:
 
     # create the csv writer
     summaryWriter = csv.writer(f)
-    summaryWriter.writerow(["Path", "Name", "Image Area", "Pixel Size", "Number of holes", "Total hole size", "Average hole size", "Density"])
+    summaryWriter.writerow(
+        ["Path", "Name", "Image Area", "Pixel Size", "Number of holes", "Total hole size", "Average hole size",
+         "Density"])
     imgNo = 0
 
     for path in paths:
@@ -208,7 +223,9 @@ class AnalyseImage:
         pathWriter = csv.writer(f2)
 
         if not exists:
-            pathWriter.writerow(["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Cntour Pixel Area", "Area in square nm", "Density"])
+            pathWriter.writerow(
+                ["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Cntour Pixel Area",
+                 "Area in square nm", "Density"])
 
         imgNo += 1
         count = 1
@@ -224,9 +241,10 @@ class AnalyseImage:
             totalArea += area
             count += 1
 
-        pathWriter.writerow([temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density) ])
+        pathWriter.writerow(
+            [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density)])
         prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
-        summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, totalArea/count, density])
+        summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, totalArea / count, density])
 
     f.close()
     render_graph(summaryFileName, os.path.dirname(summaryFileName) + "/holes.png")
