@@ -173,7 +173,7 @@ def render_combinations(baseDir):
 class AnalyseImage:
     showImages = False
 
-    paths = glob.glob("images/input/*.bmp")
+    paths = glob.glob("images/sanitized/*.bmp")
 
     baseDir = f"output/{datetime.now().date()}/{datetime.now().time()}"
     summaryFileName = f'{baseDir}/summary.csv'
