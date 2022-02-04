@@ -229,5 +229,5 @@ class AnalyseImage:
         summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, totalArea/count, density])
 
     f.close()
-    render_graph(summaryFileName, os.path.dirname(path) + "/holes.png")
+    render_graph(summaryFileName, os.path.dirname(summaryFileName) + "/holes.png")
     render_combinations(baseDir)
