@@ -1,0 +1,5 @@
+Temperature,Path,Number of holes,Image Area,Pixel Size,Cntour Pixel Area,Area in square nm,Density
+120,images/input/SiN_TiP-Alu_120_0016.bmp,1,75604690548.00003,62.01172,0,0.0,0.0
+120,images/input/SiN_TiP-Alu_120_0015.bmp,1,8400518462.666835,20.67057,0,0.0,0.0
+120,images/input/SiN_TiP-Alu_120_0014.bmp,1,1344083279.146667,8.268229,0,0.0,0.0
+120,images/input/SiN_TiP-Alu_120_0013.bmp,1,19354803.901440196,0.9921876,0,0.0,0.0
