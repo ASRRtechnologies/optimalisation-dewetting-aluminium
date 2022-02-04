@@ -1,4 +1,0 @@
-Temperature,Path,Number of holes,Image Area,Pixel Size,Cntour Pixel Area,Area in square nm,Density
-200,images/sanitized/Si-NbT_TiP-Alu_200_0001_0005.bmp,1,13440832.791466674,0.8268229,0,0.0,0.0
-200,images/sanitized/Si-NbT_TiP-Alu_200_0001_0007.bmp,80,8400518462.666835,20.67057,59881.5,25585716.060495205,9.404181462261866e-09
-200,images/sanitized/Si-NbT_TiP-Alu_200_0001_0006.bmp,63,1344083279.146667,8.268229,110036.0,7522458.2775971815,4.6128094115836796e-08

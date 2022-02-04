@@ -13,9 +13,8 @@ import pandas as pd
 
 def get_value_from_file(path, propertyName):
     t_path = path.replace("bmp", "txt")
-    print("Retrieving area for picture:", t_path)
-
     t_values = {}
+
     with open(t_path) as myfile:
         for line in myfile:
             name, var = line.partition("=")[::2]
@@ -27,8 +26,6 @@ def get_density(PixelSize, finalcountours, path):
     dataSize = get_value_from_file(path, "DataSize")
     height, width = dataSize.partition("x")[::2]
     imageArea = int(height) * int(width) * (PixelSize ** 2)
-
-    print("calculated length to be: ", height, " width to be: ", width, " total size is: ", imageArea, " nm^2")
     return imageArea, finalcountours / imageArea
 
 # finding contours
@@ -106,12 +103,15 @@ def process_image(path, showImages):
 
     return finalContours
 
-def get_color(path):
-    if path.startswith("Si"):
+def get_color(name):
+    if name.startswith("Si-NbT"):
         return 'g'
 
-    if path.startswith("Nb"):
+    if name.startswith("SiC"):
         return 'b'
+
+    if name.startswith("SiN"):
+        return 'y'
 
     return 'r'
 
@@ -154,7 +154,7 @@ def render_combinations(baseDir):
         if ax is not None:
             df.plot(x="Temperature", y="Density", kind="scatter", c=numpy.random.rand(3, ), ax=ax)
         else:
-            ax = df.plot(x="Temperature", y="Density", kind="scatter", c=numpy.random.rand(3,))
+            ax = df.plot(x="Temperature", y="Density", kind="scatter", c=get_color(prettyName))
 
         plt.xticks(rotation=90)
         plt.title(f"Density / temp {prettyName}")
