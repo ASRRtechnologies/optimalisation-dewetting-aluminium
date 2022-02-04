@@ -10,6 +10,35 @@ class ImageCleanup:
 
     for path in paths:
         fileName = os.path.basename(path)
-        desiredName = fileName.replace("C", "")
+        desiredName = fileName.replace("150C", "150")
+        desiredName = desiredName.replace("120C", "120")
+        desiredName = desiredName.replace("120B", "120")
+        desiredName = desiredName.replace("200C", "200")
+        desiredName = desiredName.replace("175C", "175")
+
+        # 120 batch
+        desiredName = desiredName.replace("Si-TiP_Alu-11", "Si_TiP-Alu")
+        desiredName = desiredName.replace("SiC-TiP_Alu-13", "SiC_TiP-Alu")
+        desiredName = desiredName.replace("SiN-TiP_Alu-14", "SiN_TiP-Alu")
+        desiredName = desiredName.replace("Si-NbTiN_TiP_Alu-12", "Si-NbT_TiP-Alu")
+
+        #150 batch
+        desiredName = desiredName.replace("Si-NbTiN_TiP_Alu-14", "Si-NbT_TiP-Alu")
+        desiredName = desiredName.replace("Si-TiP_Alu-14", "Si_TiP-Alu")
+        desiredName = desiredName.replace("SiC-TiP_Alu-14", "SiC_TiP-Alu")
+        desiredName = desiredName.replace("SiN-TiP_Alu-14", "SiN_TiP-Alu")
+
+        #170 batch
+        desiredName = desiredName.replace("NbTiN-TiP_Alu-12", "Si-NbT_TiP-Alu")
+        desiredName = desiredName.replace("Si-TiP_Alu-11", "Si_TiP-Alu")
+        desiredName = desiredName.replace("SiC-TiP_Alu-13", "SiC_TiP-Alu")
+        desiredName = desiredName.replace("SiN-TiP_Alu-14", "SiN_TiP-Alu")
+
+        #200 batch
+        desiredName = desiredName.replace("NbT-TiP_Alu-12", "Si-NbT_TiP-Alu")
+        desiredName = desiredName.replace("Si-TiP_Alu-11", "Si_TiP-Alu")
+        desiredName = desiredName.replace("SiC-TiP_Alu-12", "SiC_TiP-Alu")
+        desiredName = desiredName.replace("SiN-TiP_Alu-12", "SiN_TiP-Alu")
+
         print("Renaming ", path, " to ", desiredName)
-        os.rename(path, os.path.dirname(path) + "/" + desiredName)
+        os.rename(path, "images/sanitized/" + desiredName)
