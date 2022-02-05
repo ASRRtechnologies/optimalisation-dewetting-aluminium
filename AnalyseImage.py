@@ -28,7 +28,20 @@ def get_value_from_file(path, propertyName):
 def get_density(PixelSize, finalcountours, path):
     dataSize = get_value_from_file(path, "DataSize")
     height, width = dataSize.partition("x")[::2]
-    imageArea = int(height) * int(width) * (PixelSize ** 2)
+
+    crop = 1200
+    # new_height = height - crop
+    # new_width = width - crop
+
+    # crop = 1200 * np.ones(len(height))
+    # print(len(height))
+    # print("this is crop", crop)
+    # new_height = np.subtract(height, crop)
+    # new_width = np.substract(width, crop)
+
+    # imageArea = int(new_height) * int(new_width) * (PixelSize ** 2)
+    # imageArea = (height - crop2) * (width - crop2) * (PixelSize ** 2)
+    imageArea = (5120 - crop) * (3840 - crop) * (PixelSize ** 2)
     return imageArea, finalcountours / imageArea
 
 
@@ -48,7 +61,7 @@ def get_contours(img, imgContour):
         # print("Detected Contour with Area: ", area)
 
         # minimum area value is to be fixed as the one that leaves the coin as the small object on the scene
-        if area > 200:
+        if area > 50:
             perimeter = cv2.arcLength(cnt, True)
 
             # smaller epsilon -> more vertices detected [= more precision]
@@ -76,15 +89,10 @@ def process_image(path, showImages):
     # sourcing the input image
     img = cv2.imread(path)
 
-    # blurring
-    imgBlur = cv2.GaussianBlur(img, (3, 3), 0)
+    crop_img = img[600:3240, 600:4520].copy()
 
-    # # adding black border
-    # row, col = imgBlur.shape[:2]
-    # bottom = imgBlur[row - 2:row, 0:col]
-    #
-    # bordersize = 5000
-    # border = cv2.copyMakeBorder(imgBlur, bordersize, bordersize, bordersize, bordersize, cv2.BORDER_CONSTANT, 0)
+    # blurring
+    imgBlur = cv2.GaussianBlur(crop_img, (3, 3), 0)
 
     # graying
     imgGray = cv2.cvtColor(imgBlur, cv2.COLOR_BGR2GRAY)
@@ -97,7 +105,7 @@ def process_image(path, showImages):
     kernel = np.ones((2, 2))
     imgDil = cv2.dilate(edges, kernel, iterations=3)
     imgThre = cv2.erode(imgDil, kernel, iterations=3)
-    imgFinalContours, finalContours = get_contours(imgThre, img)
+    imgFinalContours, finalContours = get_contours(imgThre, crop_img)
 
     # show  the contours on the unfiltered starting image
     if showImages:
@@ -121,7 +129,6 @@ def get_color(name):
     return 'r'
 
 
-
 def render_graph(path, output):
     # Initialize the lists for X and Y
     data = pd.read_csv(path)
@@ -130,7 +137,6 @@ def render_graph(path, output):
 
     X = list(df.iloc[:, 1])
     Y = list(df.iloc[:, 4])
-
 
     # Plot the data using bar() method
     plt.bar(X, Y, color='b')
@@ -184,7 +190,7 @@ def render_combinations(baseDir):
 
 
 class AnalyseImage:
-    showImages = False
+    showImages = True
 
     paths = glob.glob("images/sanitized/*.bmp")
 
