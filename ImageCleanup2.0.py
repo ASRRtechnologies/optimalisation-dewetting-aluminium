@@ -3,7 +3,7 @@ import os, shutil
 
 class ImageCleanup2:
     print("Initializing helper")
-    paths = glob.glob("images/input/*/*")
+    paths = glob.glob("images/input/*/*/*")
     print(len(paths))
 
     finalImages = {}
@@ -68,7 +68,7 @@ class ImageCleanup2:
         baseDir = f"images/sanitized/{bilayer}"
         os.makedirs(baseDir, exist_ok=True)
         os.rename(path, f"{baseDir}/{formattedName}_{count}.bmp")
-        os.rename(path.replace("bmp", "txt"), f"{baseDir}/{formattedName}_{count}.bmp")
+        os.rename(path.replace("bmp", "txt"), f"{baseDir}/{formattedName}_{count}.txt")
 
     print(finalImages)
     walk = list(os.walk("images/input/"))
