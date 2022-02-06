@@ -46,7 +46,17 @@ def get_density(PixelSize, finalcountours, path):
 
 
 # finding contours
-def get_contours(img, imgContour):
+def get_minimum_area(magnification):
+    if magnification < 700:
+        return 50
+
+    if 700 <= magnification <= 1300:
+        return 250
+
+    return 400
+
+
+def get_contours(img, imgContour, magnification):
     # find all the contours from the B&W image
     contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -61,7 +71,7 @@ def get_contours(img, imgContour):
         # print("Detected Contour with Area: ", area)
 
         # minimum area value is to be fixed as the one that leaves the coin as the small object on the scene
-        if area > 50:
+        if area > get_minimum_area(int(magnification)):
             perimeter = cv2.arcLength(cnt, True)
 
             # smaller epsilon -> more vertices detected [= more precision]
@@ -73,7 +83,7 @@ def get_contours(img, imgContour):
             final_contours.append([len(approx), area, approx, cnt])
 
     # we want only two objects here: the coin and the meat slice
-    print("---\nFinal number of External Contours: ", len(final_contours))
+    print(len(final_contours), end=',')
     # so at this point final_contours should have only two elements
     # sorting in ascending order depending on the area
     final_contours = sorted(final_contours, key=lambda x: x[1], reverse=False)
@@ -85,7 +95,7 @@ def get_contours(img, imgContour):
     return imgContour, final_contours
 
 
-def process_image(path, showImages):
+def process_image(path, showImages, magnification):
     # sourcing the input image
     img = cv2.imread(path)
 
@@ -105,7 +115,7 @@ def process_image(path, showImages):
     kernel = np.ones((2, 2))
     imgDil = cv2.dilate(edges, kernel, iterations=3)
     imgThre = cv2.erode(imgDil, kernel, iterations=3)
-    imgFinalContours, finalContours = get_contours(imgThre, crop_img)
+    imgFinalContours, finalContours = get_contours(imgThre, crop_img, magnification)
 
     # show  the contours on the unfiltered starting image
     if showImages:
@@ -159,7 +169,8 @@ def render_graph(path, output):
     plt.show()
 
 
-def render_combinations(baseDir):
+def render_combinations(baseDir, y_label, description):
+    print(f"Plotting {y_label}")
     # Initialize the lists for X and Y
     paths = glob.glob(f"{baseDir}/detail/*.csv")
     ax = None
@@ -170,11 +181,8 @@ def render_combinations(baseDir):
         prettyName = os.path.basename(path).split(".")[0]
         data.sort_values(["Temperature"])
         df = pd.DataFrame(data)
-
         x_label = "Temperature"
-        y_label = "Density"
 
-        # Plot the data using bar() method
         if ax is not None:
             df.plot(x=x_label, y=y_label, kind="scatter", c=get_color(prettyName), ax=ax)
         else:
@@ -182,15 +190,15 @@ def render_combinations(baseDir):
 
         legend.append(prettyName)
         plt.xticks(rotation=90)
-        plt.title(f"Density vs. Temperature {prettyName}")
+        plt.title(f"{y_label} vs. Temperature - {prettyName}")
         plt.xlabel("Temperature (\N{DEGREE SIGN} C)")
-        plt.ylabel("Density (holes per squared nanometer)")
+        plt.ylabel(f"{y_label} {description}")
         plt.tight_layout()
 
         plt.savefig(path.replace("csv", "png"))
 
     ax.legend(legend)
-    plt.savefig(f"{baseDir}/summary.png")
+    plt.savefig(f"{baseDir}/{y_label}-summary.png")
 
     # Show the plot
     plt.show()
@@ -205,6 +213,7 @@ class AnalyseImage:
         print(f"Executing script for bilayer {bilayer}")
 
         paths = glob.glob(f"images/sanitized/{bilayer}/*.bmp")
+        print(f"Found {len(paths)} images to be analyzed")
         baseDir = f"{globBaseDir}/{bilayer}"
         summaryFileName = f'{baseDir}/summary.csv'
 
@@ -242,13 +251,13 @@ class AnalyseImage:
             if not exists:
                 pathWriter.writerow(
                     ["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Cntour Pixel Area",
-                     "Area in square nm", "Density"])
+                     "Area in square nm", "Density", "Average Hole Size", "Magnification"])
 
             imgNo += 1
             count = 1
             totalArea = 0
             magnification = get_value_from_file(path, "Magnification")
-            finalContours = process_image(path, showImages)
+            finalContours = process_image(path, showImages, magnification)
             pixelSize = float(get_value_from_file(path, "PixelSize"))
 
             imageArea, density = get_density(pixelSize, len(finalContours), path)
@@ -259,10 +268,13 @@ class AnalyseImage:
                 count += 1
 
             pathWriter.writerow(
-                [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density)])
+                [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density), totalArea/count, magnification])
             prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
             summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, totalArea / count, density])
 
+        print("DONE")
         f.close()
         render_graph(summaryFileName, os.path.dirname(summaryFileName) + "/holes.png")
-        render_combinations(baseDir)
+        render_combinations(baseDir, "Density", "Beschrijving 1")
+        render_combinations(baseDir, "Average Hole Size", "Beschrijving 2")
+        print(f"Finished processing {bilayer}")
