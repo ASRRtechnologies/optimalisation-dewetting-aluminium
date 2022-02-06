@@ -115,6 +115,13 @@ def process_image(path, showImages):
 
     return finalContours
 
+def get_props_from_path_name(path):
+    cf = os.path.basename(path)
+    substrate = cf.split("_")[0]
+    bilayer = cf.split("_")[1]
+    temp = cf.split("_")[2]
+
+    return substrate, bilayer, temp
 
 def get_color(name):
     if name.startswith("Si-NbTiN"):
@@ -192,66 +199,70 @@ def render_combinations(baseDir):
 class AnalyseImage:
     showImages = False
 
-    paths = glob.glob("images/sanitized/*.bmp")
+    globBaseDir = f"output/{datetime.now().date()}/{datetime.now().time()}"
 
-    baseDir = f"output/{datetime.now().date()}/{datetime.now().time()}"
-    summaryFileName = f'{baseDir}/summary.csv'
+    for bilayer in os.listdir("images/sanitized/"):
+        print(f"Executing script for bilayer {bilayer}")
 
-    # Create folder if it doesnt exisst
-    if not os.path.exists(os.path.dirname(summaryFileName)):
-        try:
-            os.makedirs(os.path.dirname(summaryFileName))
-        except OSError as exc:  # Guard against race condition
-            if exc.errno != errno.EEXIST:
-                raise
+        paths = glob.glob(f"images/sanitized/{bilayer}/*.bmp")
+        baseDir = f"{globBaseDir}/{bilayer}"
+        summaryFileName = f'{baseDir}/summary.csv'
 
-    # open the file in the write mode
-    f = open(summaryFileName, 'w+')
+        # Create folder if it doesnt exisst
+        if not os.path.exists(os.path.dirname(summaryFileName)):
+            try:
+                os.makedirs(os.path.dirname(summaryFileName))
+            except OSError as exc:  # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise
 
-    # create the csv writer
-    summaryWriter = csv.writer(f)
-    summaryWriter.writerow(
-        ["Path", "Name", "Image Area", "Pixel Size", "Number of holes", "Total hole size", "Average hole size",
-         "Density"])
-    imgNo = 0
+        # open the file in the write mode
+        f = open(summaryFileName, 'w+')
 
-    for path in paths:
-        cf = os.path.basename(path)
-        substrate = cf.split("_")[0]
-        bilayer = cf.split("_")[1]
-        temp = cf.split("_")[2]
+        # create the csv writer
+        summaryWriter = csv.writer(f)
+        summaryWriter.writerow(
+            ["Path", "Name", "Image Area", "Pixel Size", "Number of holes", "Total hole size", "Average hole size",
+             "Density"])
+        imgNo = 0
 
-        detailBaseDir = f"{baseDir}/detail/"
-        os.makedirs(detailBaseDir, exist_ok=True)
-        detailPath = f"{detailBaseDir}/{substrate}-{bilayer}.csv"
-        exists = os.path.exists(detailPath)
-        f2 = open(detailPath, 'a+')
-        pathWriter = csv.writer(f2)
+        for path in paths:
+            cf = os.path.basename(path)
+            substrate = cf.split("_")[0]
+            bilayer = cf.split("_")[1]
+            temp = cf.split("_")[2]
 
-        if not exists:
+            detailBaseDir = f"{baseDir}/detail/"
+            os.makedirs(detailBaseDir, exist_ok=True)
+            detailPath = f"{detailBaseDir}/{substrate}-{bilayer}.csv"
+            exists = os.path.exists(detailPath)
+            f2 = open(detailPath, 'a+')
+            pathWriter = csv.writer(f2)
+
+            if not exists:
+                pathWriter.writerow(
+                    ["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Cntour Pixel Area",
+                     "Area in square nm", "Density"])
+
+            imgNo += 1
+            count = 1
+            totalArea = 0
+            magnification = get_value_from_file(path, "Magnification")
+            finalContours = process_image(path, showImages)
+            pixelSize = float(get_value_from_file(path, "PixelSize"))
+
+            imageArea, density = get_density(pixelSize, len(finalContours), path)
+
+            for finalContour in finalContours:
+                length, area, approx, cnt = finalContour
+                totalArea += area
+                count += 1
+
             pathWriter.writerow(
-                ["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Cntour Pixel Area",
-                 "Area in square nm", "Density"])
+                [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density)])
+            prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
+            summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, totalArea / count, density])
 
-        imgNo += 1
-        count = 1
-        totalArea = 0
-        magnification = get_value_from_file(path, "Magnification")
-        finalContours = process_image(path, showImages)
-        pixelSize = float(get_value_from_file(path, "PixelSize"))
-
-        imageArea, density = get_density(pixelSize, len(finalContours), path)
-
-        for finalContour in finalContours:
-            length, area, approx, cnt = finalContour
-            totalArea += area
-            count += 1
-
-        pathWriter.writerow(
-            [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density)])
-        prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
-        summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, totalArea / count, density])
-
-    f.close()
-    render_graph(summaryFileName, os.path.dirname(summaryFileName) + "/holes.png")
-    render_combinations(baseDir)
+        f.close()
+        render_graph(summaryFileName, os.path.dirname(summaryFileName) + "/holes.png")
+        render_combinations(baseDir)

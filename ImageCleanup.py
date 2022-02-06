@@ -10,12 +10,22 @@ class ImageCleanup:
 
     for path in paths:
         fileName = os.path.basename(path)
+        bilayer = "none"
+
+        if "TiP-Alu" in fileName:
+            bilayer = "TiP-Alu"
+
+        if "TiB-Alu" in fileName:
+            bilayer = "TiB-Alu"
+
+
         desiredName = fileName.replace("150C", "150")
         desiredName = desiredName.replace("120C", "120")
         desiredName = desiredName.replace("120B", "120")
         desiredName = desiredName.replace("200C", "200")
         desiredName = desiredName.replace("175C", "175")
 
+        # # TiP
         # 120 batch
         desiredName = desiredName.replace("Si-TiP_Alu_11", "Si_TiP-Alu")
         desiredName = desiredName.replace("SiC-TiP_Alu-13", "SiC_TiP-Alu")
@@ -47,4 +57,6 @@ class ImageCleanup:
         if os.path.basename(path) != desiredName:
             print("Renaming ", os.path.basename(path), " to ", desiredName)
 
-        os.rename(path, "images/sanitized/" + desiredName)
+        baseDir = f"images/sanitized/{bilayer}"
+        os.makedirs(baseDir, exist_ok=True)
+        os.rename(path, f"{baseDir}/{desiredName}")
