@@ -190,7 +190,7 @@ def render_combinations(baseDir):
 
 
 class AnalyseImage:
-    showImages = True
+    showImages = False
 
     paths = glob.glob("images/sanitized/*.bmp")
 
@@ -236,10 +236,10 @@ class AnalyseImage:
         imgNo += 1
         count = 1
         totalArea = 0
-
+        magnification = get_value_from_file(path, "Magnification")
         finalContours = process_image(path, showImages)
         pixelSize = float(get_value_from_file(path, "PixelSize"))
-        magnification = get_value_from_file(path, "Magnification")
+
         imageArea, density = get_density(pixelSize, len(finalContours), path)
 
         for finalContour in finalContours:
