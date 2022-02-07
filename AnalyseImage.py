@@ -205,7 +205,7 @@ def render_combinations(baseDir, y_label, description):
 
 
 class AnalyseImage:
-    showImages = False
+    showImages = True
 
     globBaseDir = f"output/{datetime.now().date()}/{datetime.now().time()}"
 
