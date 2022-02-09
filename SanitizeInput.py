@@ -4,7 +4,7 @@ import os
 
 class SanitizeInput:
     print("Initializing image sanitization...")
-    paths = glob.glob("images/input/*/*/*")
+    paths = glob.glob("images/input/*")
     print(f"Found {len(paths)} images to sanitize")
 
     finalImages = {}

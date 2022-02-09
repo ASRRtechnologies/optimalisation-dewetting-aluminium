@@ -11,7 +11,6 @@ Quantifying these effects as a function of substrate material or adhesion layer 
 Obtain images of the samples with the SEM or optical microscope and analyze the images with a python script to obtain the number of holes and the area of the holes.
 
 
-![img.png](images/results/first-contour.png)
 
 ## Checklist
 - [x] Blur image

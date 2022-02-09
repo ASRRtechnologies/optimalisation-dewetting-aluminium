@@ -48,12 +48,12 @@ def get_density(PixelSize, finalcountours, path):
 # finding contours
 def get_minimum_area(magnification):
     if magnification < 700:
-        return 50
+        return 40
 
     if 700 <= magnification <= 1300:
-        return 250
+        return 150
 
-    return 400
+    return 200
 
 
 def get_contours(img, imgContour, magnification):
@@ -205,7 +205,7 @@ def render_combinations(baseDir, y_label, description):
 
 
 class AnalyseImage:
-    showImages = True
+    showImages = False
 
     globBaseDir = f"output/{datetime.now().date()}/{datetime.now().time()}"
 
