@@ -217,7 +217,7 @@ class AnalyseImage:
         baseDir = f"{globBaseDir}/{bilayer}"
         summaryFileName = f'{baseDir}/summary.csv'
 
-        # Create folder if it doesnt exisst
+        # Create folder if it doesnt exist
         if not os.path.exists(os.path.dirname(summaryFileName)):
             try:
                 os.makedirs(os.path.dirname(summaryFileName))
@@ -250,7 +250,7 @@ class AnalyseImage:
 
             if not exists:
                 pathWriter.writerow(
-                    ["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Cntour Pixel Area",
+                    ["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Contour Pixel Area",
                      "Area in square nm", "Density", "Average Hole Size", "Magnification"])
 
             imgNo += 1
@@ -268,9 +268,9 @@ class AnalyseImage:
                 count += 1
 
             pathWriter.writerow(
-                [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density), totalArea/count, magnification])
+                [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density), (totalArea * (pixelSize ** 2))/count, magnification])
             prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
-            summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, totalArea / count, density])
+            summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, (totalArea * (pixelSize ** 2))/count, density])
 
         print("DONE")
         f.close()
