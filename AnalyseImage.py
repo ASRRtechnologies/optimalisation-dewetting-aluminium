@@ -41,8 +41,9 @@ def get_density(PixelSize, finalcountours, path):
 
     # imageArea = int(new_height) * int(new_width) * (PixelSize ** 2)
     # imageArea = (height - crop2) * (width - crop2) * (PixelSize ** 2)
-    imageArea = (5120 - crop) * (3840 - crop) * (PixelSize ** 2)
-    return imageArea, finalcountours / imageArea
+    imageAreaPixels = (5120 - crop) * (3840 - crop)
+    imageArea = imageAreaPixels * (PixelSize ** 2)
+    return imageArea, finalcountours / imageArea, imageAreaPixels
 
 
 # finding contours
@@ -232,7 +233,7 @@ class AnalyseImage:
         summaryWriter = csv.writer(f)
         summaryWriter.writerow(
             ["Path", "Name", "Image Area", "Pixel Size", "Number of holes", "Total hole size", "Average hole size",
-             "Density"])
+             "Density", "Percentage Holes"])
         imgNo = 0
 
         for path in paths:
@@ -251,7 +252,7 @@ class AnalyseImage:
             if not exists:
                 pathWriter.writerow(
                     ["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Contour Pixel Area",
-                     "Area in square nm", "Density", "Average Hole Size", "Magnification"])
+                     "Area in square nm", "Density", "Average Hole Size", "Magnification", "Percentage Holes"])
 
             imgNo += 1
             count = 1
@@ -260,7 +261,7 @@ class AnalyseImage:
             finalContours = process_image(path, showImages, magnification)
             pixelSize = float(get_value_from_file(path, "PixelSize"))
 
-            imageArea, density = get_density(pixelSize, len(finalContours), path)
+            imageArea, density, imageAreaPixels = get_density(pixelSize, len(finalContours), path)
 
             for finalContour in finalContours:
                 length, area, approx, cnt = finalContour
@@ -268,13 +269,14 @@ class AnalyseImage:
                 count += 1
 
             pathWriter.writerow(
-                [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density), (totalArea * (pixelSize ** 2))/count, magnification])
+                [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density), (totalArea * (pixelSize ** 2))/count, magnification, (totalArea / imageAreaPixels)])
             prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
-            summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, (totalArea * (pixelSize ** 2))/count, density])
+            summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, (totalArea * (pixelSize ** 2))/count, density, (totalArea / imageAreaPixels)])
 
         print("DONE")
         f.close()
         render_graph(summaryFileName, os.path.dirname(summaryFileName) + "/holes.png")
-        render_combinations(baseDir, "Density", "Beschrijving 1")
-        render_combinations(baseDir, "Average Hole Size", "Beschrijving 2")
+        render_combinations(baseDir, "Density", "The density of holes (holes/nm^2)")
+        render_combinations(baseDir, "Average Hole Size", "The average holes sizes")
+        render_combinations(baseDir, "Percentage Holes", "The percentage of the images that is made up from holes")
         print(f"Finished processing {bilayer}")
