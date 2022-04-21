@@ -42,7 +42,7 @@ def get_density(PixelSize, finalcountours, path):
     # imageArea = int(new_height) * int(new_width) * (PixelSize ** 2)
     # imageArea = (height - crop2) * (width - crop2) * (PixelSize ** 2)
     imageAreaPixels = (5120 - crop) * (3840 - crop)
-    imageArea = imageAreaPixels * (PixelSize ** 2)
+    imageArea = imageAreaPixels * (PixelSize ** 2) * 10**-6
     return imageArea, finalcountours / imageArea, imageAreaPixels
 
 
@@ -191,7 +191,8 @@ def render_combinations(baseDir, y_label, description):
 
         legend.append(prettyName)
         plt.xticks(rotation=90)
-        plt.title(f"{y_label} vs. Temperature - {prettyName}")
+        plt.title(f"{y_label} vs. Temperature")
+        plt.yscale("log")
         plt.xlabel("Temperature (\N{DEGREE SIGN} C)")
         plt.ylabel(f"{y_label} {description}")
         plt.tight_layout()
@@ -269,14 +270,14 @@ class AnalyseImage:
                 count += 1
 
             pathWriter.writerow(
-                [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density), (totalArea * (pixelSize ** 2))/count, magnification, (totalArea / imageAreaPixels)])
+                [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density), (totalArea * (pixelSize ** 2) * 10**-6)/count, magnification, (totalArea / imageAreaPixels)])
             prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
-            summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, (totalArea * (pixelSize ** 2))/count, density, (totalArea / imageAreaPixels)])
+            summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, (totalArea * (pixelSize ** 2) * 10**-6)/count, density, (totalArea / imageAreaPixels)])
 
         print("DONE")
         f.close()
         render_graph(summaryFileName, os.path.dirname(summaryFileName) + "/holes.png")
-        render_combinations(baseDir, "Density", "The density of holes (holes/nm^2)")
-        render_combinations(baseDir, "Average Hole Size", "The average holes sizes")
-        render_combinations(baseDir, "Percentage Holes", "The percentage of the images that is made up from holes")
+        render_combinations(baseDir, "Density", " (number of holes per squared micron) ")
+        render_combinations(baseDir, "Average Hole Size", " (squared microns")
+        render_combinations(baseDir, "Percentage Holes", "  ")
         print(f"Finished processing {bilayer}")
