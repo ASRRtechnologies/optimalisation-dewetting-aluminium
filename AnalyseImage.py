@@ -278,6 +278,6 @@ class AnalyseImage:
         f.close()
         render_graph(summaryFileName, os.path.dirname(summaryFileName) + "/holes.png")
         render_combinations(baseDir, "Density", " (number of holes per squared micron) ")
-        render_combinations(baseDir, "Average Hole Size", " (squared microns")
+        render_combinations(baseDir, "Average Hole Size", " (squared microns) ")
         render_combinations(baseDir, "Percentage Holes", "  ")
         print(f"Finished processing {bilayer}")
