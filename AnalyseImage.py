@@ -146,6 +146,18 @@ def get_color(name):
 
     return 'r'
 
+def get_marker(name):
+    if name.startswith("Si-NbTiN"):
+        return 'o'
+
+    if name.startswith("SiC"):
+        return 'v'
+
+    if name.startswith("SiN"):
+        return 's'
+
+    return '*'
+
 
 def render_graph(path, output):
     # Initialize the lists for X and Y
@@ -170,7 +182,7 @@ def render_graph(path, output):
     plt.show()
 
 
-def render_combinations(baseDir, y_label, description):
+def render_combinations(baseDir, y_label, description, y_min, y_max):
     print(f"Plotting {y_label}")
     # Initialize the lists for X and Y
     paths = glob.glob(f"{baseDir}/detail/*.csv")
@@ -185,21 +197,22 @@ def render_combinations(baseDir, y_label, description):
         x_label = "Temperature"
 
         if ax is not None:
-            df.plot(x=x_label, y=y_label, kind="scatter", c=get_color(prettyName), ax=ax)
+            df.plot(x=x_label, y=y_label, kind="scatter", c=get_color(prettyName), ax=ax, marker=get_marker(prettyName))
         else:
-            ax = df.plot(x=x_label, y=y_label, kind="scatter", c=get_color(prettyName))
+            ax = df.plot(x=x_label, y=y_label, kind="scatter", c=get_color(prettyName), marker=get_marker(prettyName))
 
         legend.append(prettyName)
         plt.xticks(rotation=90)
         plt.title(f"{y_label} vs. Temperature")
         plt.yscale("log")
+        plt.ylim([y_min, y_max])
         plt.xlabel("Temperature (\N{DEGREE SIGN} C)")
         plt.ylabel(f"{y_label} {description}")
         plt.tight_layout()
 
         plt.savefig(path.replace("csv", "png"))
 
-    ax.legend(legend)
+    ax.legend(legend, loc='upper left')
     plt.savefig(f"{baseDir}/{y_label}-summary.png")
 
     # Show the plot
@@ -234,7 +247,7 @@ class AnalyseImage:
         summaryWriter = csv.writer(f)
         summaryWriter.writerow(
             ["Path", "Name", "Image Area", "Pixel Size", "Number of holes", "Total hole size", "Average hole size",
-             "Density", "Percentage Holes"])
+             "Density", "Fraction Holes"])
         imgNo = 0
 
         for path in paths:
@@ -253,7 +266,7 @@ class AnalyseImage:
             if not exists:
                 pathWriter.writerow(
                     ["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Contour Pixel Area",
-                     "Area in square nm", "Density", "Average Hole Size", "Magnification", "Percentage Holes"])
+                     "Area in square nm", "Density", "Average Hole Size", "Magnification", "Fraction Holes"])
 
             imgNo += 1
             count = 1
@@ -277,7 +290,7 @@ class AnalyseImage:
         print("DONE")
         f.close()
         render_graph(summaryFileName, os.path.dirname(summaryFileName) + "/holes.png")
-        render_combinations(baseDir, "Density", " (number of holes per squared micron) ")
-        render_combinations(baseDir, "Average Hole Size", " (squared microns) ")
-        render_combinations(baseDir, "Percentage Holes", "  ")
+        render_combinations(baseDir, "Density", " (number of holes per squared micron) ", 10**-5, 0.3)
+        render_combinations(baseDir, "Average Hole Size", " (squared microns) ", 3*10**-2, 11)
+        render_combinations(baseDir, "Fraction Holes", "  ", 3*10**-6, 0.04)
         print(f"Finished processing {bilayer}")
