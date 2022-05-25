@@ -30,17 +30,6 @@ def get_density(PixelSize, finalcountours, path):
     height, width = dataSize.partition("x")[::2]
 
     crop = 1200
-    # new_height = height - crop
-    # new_width = width - crop
-
-    # crop = 1200 * np.ones(len(height))
-    # print(len(height))
-    # print("this is crop", crop)
-    # new_height = np.subtract(height, crop)
-    # new_width = np.substract(width, crop)
-
-    # imageArea = int(new_height) * int(new_width) * (PixelSize ** 2)
-    # imageArea = (height - crop2) * (width - crop2) * (PixelSize ** 2)
     imageAreaPixels = (5120 - crop) * (3840 - crop)
     imageArea = imageAreaPixels * (PixelSize ** 2) * 10 ** -6
     return imageArea, finalcountours / imageArea, imageAreaPixels
