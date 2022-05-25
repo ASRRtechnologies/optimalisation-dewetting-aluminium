@@ -7,6 +7,10 @@ Minimalise the dewetting effects on thin Aluminum films through varying substrat
 ### Secondary:
 Quantifying these effects as a function of substrate material or adhesion layer material for a given thermal budget.
 
+### Scope and limitations
+The scope of the tool is the described combinations of substrates, bilayers and temperatures. However, this can be altered to the desired combinations. 
+
+
 ## Method:
 Obtain images of the samples with the SEM or optical microscope and analyze the images with a python script to obtain the hole size and hole density. For the best results use one magnification (preferably 1.2k) and photograph the same film area. 
 
@@ -43,9 +47,6 @@ The graphs and tables are classified by type of bi-layer of a sample (for exampl
 * Run SanitizeInput.py to sanitize the input into correct naming. 
 * The tool crops image, because there is often noise on the outer edge causing disturbances in the data. 
 * The output is presented in concise and well-organised graphs and tables.
-
-## Scope and limitations
-* The scope of the tool is the described combinations of substrates, bilayers and temperatures. However, this can be altered to the desired combinations. 
 
 ### Versions
 
