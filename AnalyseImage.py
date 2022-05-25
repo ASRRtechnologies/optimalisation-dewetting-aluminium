@@ -42,7 +42,7 @@ def get_density(PixelSize, finalcountours, path):
     # imageArea = int(new_height) * int(new_width) * (PixelSize ** 2)
     # imageArea = (height - crop2) * (width - crop2) * (PixelSize ** 2)
     imageAreaPixels = (5120 - crop) * (3840 - crop)
-    imageArea = imageAreaPixels * (PixelSize ** 2) * 10**-6
+    imageArea = imageAreaPixels * (PixelSize ** 2) * 10 ** -6
     return imageArea, finalcountours / imageArea, imageAreaPixels
 
 
@@ -126,6 +126,7 @@ def process_image(path, showImages, magnification):
 
     return finalContours
 
+
 def get_props_from_path_name(path):
     cf = os.path.basename(path)
     substrate = cf.split("_")[0]
@@ -133,6 +134,7 @@ def get_props_from_path_name(path):
     temp = cf.split("_")[2]
 
     return substrate, bilayer, temp
+
 
 def get_color(name):
     if name.startswith("Si-NbTiN"):
@@ -145,6 +147,7 @@ def get_color(name):
         return 'y'
 
     return 'r'
+
 
 def get_marker(name):
     if name.startswith("Si-NbTiN"):
@@ -209,6 +212,7 @@ def render_combinations(baseDir, y_label, description, y_min, y_max):
         plt.xlabel("Temperature (\N{DEGREE SIGN} C)")
         plt.ylabel(f"{y_label} {description}")
         plt.tight_layout()
+        plt.grid()
 
         plt.savefig(path.replace("csv", "png"))
 
@@ -283,14 +287,17 @@ class AnalyseImage:
                 count += 1
 
             pathWriter.writerow(
-                [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density), (totalArea * (pixelSize ** 2) * 10**-6)/count, magnification, (totalArea / imageAreaPixels)])
+                [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density),
+                 (totalArea * (pixelSize ** 2) * 10 ** -6) / count, magnification, (totalArea / imageAreaPixels)])
             prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
-            summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea, (totalArea * (pixelSize ** 2) * 10**-6)/count, density, (totalArea / imageAreaPixels)])
+            summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea,
+                                    (totalArea * (pixelSize ** 2) * 10 ** -6) / count, density,
+                                    (totalArea / imageAreaPixels)])
 
         print("DONE")
         f.close()
         render_graph(summaryFileName, os.path.dirname(summaryFileName) + "/holes.png")
-        render_combinations(baseDir, "Density", " (number of holes per squared micron) ", 10**-5, 0.3)
-        render_combinations(baseDir, "Average Hole Size", " (squared microns) ", 3*10**-2, 11)
-        render_combinations(baseDir, "Fraction Holes", "  ", 3*10**-6, 0.04)
+        render_combinations(baseDir, "Density", " (number of holes per squared micron) ", 10 ** -5, 0.3)
+        render_combinations(baseDir, "Average Hole Size", " (squared microns) ", 3 * 10 ** -2, 11)
+        render_combinations(baseDir, "Fraction Holes", "  ", 3 * 10 ** -6, 0.04)
         print(f"Finished processing {bilayer}")
