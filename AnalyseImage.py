@@ -188,12 +188,19 @@ def render_combinations(baseDir, y_label, description, y_min, y_max):
         df = pd.DataFrame(data)
         x_label = "Temperature"
 
-        if ax is not None:
-            df.plot(x=x_label, y=y_label, kind="scatter", c=get_color(prettyName), ax=ax, marker=get_marker(prettyName))
-        else:
-            ax = df.plot(x=x_label, y=y_label, kind="scatter", c=get_color(prettyName), marker=get_marker(prettyName))
+        for temp in [21, 120, 150, 175, 200]:
+            a = df.loc[df["Temperature"] == temp]
+            values = a[y_label]
+            stdev = np.std(values)
+            plt.errorbar(a["Temperature"], values, yerr=stdev, fmt='o', color=get_color(prettyName), elinewidth=1, capthick=1,errorevery=1, alpha=1, ms=4, capsize = 5)
 
         legend.append(prettyName)
+
+        if ax is not None:
+            df.plot(x=x_label, y=y_label, kind="scatter", c=get_color(prettyName), ax=ax, marker=get_marker(prettyName), yerr=stdev)
+        else:
+            ax = df.plot(x=x_label, y=y_label, kind="scatter", c=get_color(prettyName), marker=get_marker(prettyName), yerr=stdev)
+
         plt.xticks(rotation=90)
         plt.title(f"{y_label} vs. Temperature")
         plt.yscale("log")
@@ -202,6 +209,7 @@ def render_combinations(baseDir, y_label, description, y_min, y_max):
         plt.ylabel(f"{y_label} {description}")
         plt.tight_layout()
         plt.grid()
+
 
         plt.savefig(path.replace("csv", "png"))
 
