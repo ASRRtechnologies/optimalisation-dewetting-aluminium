@@ -9,8 +9,6 @@ import os
 import errno
 import matplotlib.pyplot as plt
 import pandas as pd
-from numpy import arange
-from scipy.optimize import curve_fit
 
 
 def get_value_from_file(path, propertyName):
@@ -240,7 +238,7 @@ class AnalyseImage:
         summaryWriter = csv.writer(f)
         summaryWriter.writerow(
             ["Path", "Name", "Image Area", "Pixel Size", "Number of holes", "Total hole size", "Average hole size",
-             "Density", "Fraction Holes"])
+             "Density", "Fraction Holes", "Fraction Dead Pixels"])
         imgNo = 0
 
         for path in paths:
@@ -259,7 +257,7 @@ class AnalyseImage:
             if not exists:
                 pathWriter.writerow(
                     ["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Contour Pixel Area",
-                     "Area in square nm", "Density", "Average Hole Size", "Magnification", "Fraction Holes"])
+                     "Area in square nm", "Density", "Average Hole Size", "Magnification", "Fraction Holes", "Fraction Dead Pixels"])
 
             imgNo += 1
             count = 1
@@ -276,12 +274,15 @@ class AnalyseImage:
                 count += 1
 
             pathWriter.writerow(
-                [temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density),
-                 (totalArea * (pixelSize ** 2) * 10 ** -6) / count, magnification, (totalArea / imageAreaPixels)])
+                (temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density),
+                 (totalArea * (pixelSize ** 2) * 10 ** -6) / count, magnification, (totalArea / imageAreaPixels),
+                 ((1.6 * 10 ** 8) / imageAreaPixels) / ((pixelSize ** 2) / count)))
             prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
-            summaryWriter.writerow([path, prettyName, imageArea, pixelSize, count, totalArea,
+            summaryWriter.writerow({path, prettyName, imageArea, pixelSize, count, totalArea,
                                     (totalArea * (pixelSize ** 2) * 10 ** -6) / count, density,
-                                    (totalArea / imageAreaPixels)])
+                                    (totalArea / imageAreaPixels),
+                                    ((1.6 * 10 ** 8)  / imageAreaPixels) / ((pixelSize ** 2) / count)})
+
 
         print("DONE")
         f.close()
@@ -289,4 +290,5 @@ class AnalyseImage:
         render_combinations(baseDir, "Density", " (number of holes per squared micron) ", 10 ** -5, 0.3)
         render_combinations(baseDir, "Average Hole Size", " (squared microns) ", 3 * 10 ** -2, 11)
         render_combinations(baseDir, "Fraction Holes", "  ", 3 * 10 ** -6, 0.04)
+        render_combinations(baseDir, "Fraction Dead Pixels", " " , 1 * 10 ** -3, 100 )
         print(f"Finished processing {bilayer}")
