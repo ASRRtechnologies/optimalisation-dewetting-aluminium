@@ -238,7 +238,7 @@ class AnalyseImage:
         summaryWriter = csv.writer(f)
         summaryWriter.writerow(
             ["Path", "Name", "Image Area", "Pixel Size", "Number of holes", "Total hole size", "Average hole size",
-             "Density", "Fraction Holes", "Fraction Dead Pixels"])
+             "Density", "Dead Area"])
         imgNo = 0
 
         for path in paths:
@@ -257,7 +257,7 @@ class AnalyseImage:
             if not exists:
                 pathWriter.writerow(
                     ["Temperature", "Path", "Number of holes", "Image Area", "Pixel Size", "Contour Pixel Area",
-                     "Area in square nm", "Density", "Average Hole Size", "Magnification", "Fraction Holes", "Fraction Dead Pixels"])
+                     "Area in square nm", "Density", "Average Hole Size", "Magnification", "Dead Area"])
 
             imgNo += 1
             count = 1
@@ -275,13 +275,11 @@ class AnalyseImage:
 
             pathWriter.writerow(
                 (temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density),
-                 (totalArea * (pixelSize ** 2) * 10 ** -6) / count, magnification, (totalArea / imageAreaPixels),
-                 ((1.6 * 10 ** 8) / imageAreaPixels) / ((pixelSize ** 2) / count)))
+                 (totalArea * (pixelSize ** 2) * 10 ** -6) / count, magnification, density * 400 * 0.126))
             prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
             summaryWriter.writerow({path, prettyName, imageArea, pixelSize, count, totalArea,
                                     (totalArea * (pixelSize ** 2) * 10 ** -6) / count, density,
-                                    (totalArea / imageAreaPixels),
-                                    ((1.6 * 10 ** 8)  / imageAreaPixels) / ((pixelSize ** 2) / count)})
+                                   density * 400 * 0.126})
 
 
         print("DONE")
@@ -289,6 +287,5 @@ class AnalyseImage:
         render_graph(summaryFileName, os.path.dirname(summaryFileName) + "/holes.png")
         render_combinations(baseDir, "Density", " (number of holes per squared micron) ", 10 ** -5, 0.3)
         render_combinations(baseDir, "Average Hole Size", " (squared microns) ", 3 * 10 ** -2, 11)
-        render_combinations(baseDir, "Fraction Holes", "  ", 3 * 10 ** -6, 0.04)
-        render_combinations(baseDir, "Fraction Dead Pixels", " " , 1 * 10 ** -3, 100 )
+        render_combinations(baseDir, "Dead Area", " (rate for critically damaging holes in MKID) " , 1 * 10 ** -3, 10 )
         print(f"Finished processing {bilayer}")
