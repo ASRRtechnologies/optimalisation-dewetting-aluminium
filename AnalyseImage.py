@@ -275,17 +275,16 @@ class AnalyseImage:
 
             pathWriter.writerow(
                 (temp, path, count, imageArea, pixelSize, totalArea, (pixelSize ** 2) * totalArea, str(density),
-                 (totalArea * (pixelSize ** 2) * 10 ** -6) / count, magnification, density * 400 * 0.126))
+                 (totalArea * (pixelSize ** 2) * 10 ** -6) / count, magnification, density * 400 * 0.4))
             prettyName = os.path.basename(path).split("_")[0] + "|" + magnification
             summaryWriter.writerow({path, prettyName, imageArea, pixelSize, count, totalArea,
                                     (totalArea * (pixelSize ** 2) * 10 ** -6) / count, density,
-                                   density * 400 * 0.126})
-
+                                    density * 400 * 0.4})
 
         print("DONE")
         f.close()
         render_graph(summaryFileName, os.path.dirname(summaryFileName) + "/holes.png")
         render_combinations(baseDir, "Density", " (number of holes per squared micron) ", 10 ** -5, 0.3)
         render_combinations(baseDir, "Average Hole Size", " (squared microns) ", 3 * 10 ** -2, 11)
-        render_combinations(baseDir, "Dead Area", " (rate for critically damaging holes in MKID) " , 1 * 10 ** -3, 10 )
+        render_combinations(baseDir, "Dead Area", " (rate for critically damaging holes in MKID) ", 1 * 10 ** -3, 40)
         print(f"Finished processing {bilayer}")
